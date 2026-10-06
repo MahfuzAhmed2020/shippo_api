@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shippo Shipping Label</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7fb; color: #1f2937; }
+        header { background: #111827; color: white; padding: 22px 5%; }
+        header h1 { margin: 0 0 6px; font-size: 26px; }
+        header p { margin: 0; color: #cbd5e1; }
+        main { width: min(1180px, 94%); margin: 28px auto; }
+        .card { background: white; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 18px rgba(15, 23, 42, .08); }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .parcel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+        input { width: 100%; padding: 10px 11px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 14px; }
+        input:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
+        .field { margin-bottom: 13px; }
+        .section-title { margin: 0 0 16px; font-size: 19px; }
+        button { border: 0; border-radius: 7px; padding: 11px 16px; cursor: pointer; font-weight: 700; }
+        .primary { background: #2563eb; color: white; }
+        .secondary { background: #e2e8f0; color: #0f172a; }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+        .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .status { margin-top: 14px; padding: 11px 13px; border-radius: 7px; display: none; }
+        .status.info { display: block; background: #eff6ff; color: #1d4ed8; }
+        .status.error { display: block; background: #fef2f2; color: #b91c1c; }
+        .status.success { display: block; background: #f0fdf4; color: #15803d; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { text-align: left; padding: 11px; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f8fafc; }
+        tr.selected { background: #eff6ff; }
+        .hidden { display: none; }
+        .result strong { display: inline-block; min-width: 145px; }
+        a { color: #2563eb; font-weight: 700; }
+        @media (max-width: 800px) {
+            .grid, .parcel-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>📦 Shippo Shipping Label</h1>
+    <p>Spring Boot + Shippo + MySQL demo</p>
+</header>
+
+<main>
+    <form id="shipmentForm">
+        <div class="card">
+            <h2 class="section-title">FROM Address</h2>
+            <div class="grid">
+                <div>
+                    <div class="field"><label for="fromName">Name *</label><input id="fromName" required value="Shippo Test"></div>
+                    <div class="field"><label for="fromCompany">Company</label><input id="fromCompany" value="Shippo"></div>
+                    <div class="field"><label for="fromStreet">Street *</label><input id="fromStreet" required value="215 Clayton St."></div>
+                    <div class="field"><label for="fromCity">City *</label><input id="fromCity" required value="San Francisco"></div>
+                    <div class="field"><label for="fromState">State *</label><input id="fromState" required value="CA"></div>
+                </div>
+                <div>
+                    <div class="field"><label for="fromZip">ZIP *</label><input id="fromZip" required value="94117"></div>
+                    <div class="field"><label for="fromCountry">Country *</label><input id="fromCountry" required maxlength="2" value="US"></div>
+                    <div class="field"><label for="fromPhone">Phone</label><input id="fromPhone" value="+1 555 341 9393"></div>
+                    <div class="field"><label for="fromEmail">Email</label><input id="fromEmail" type="email" value="test@example.com"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">TO Address</h2>
+            <div class="grid">
+                <div>
+                    <div class="field"><label for="toName">Name *</label><input id="toName" required value="Test Customer"></div>
+                    <div class="field"><label for="toCompany">Company</label><input id="toCompany"></div>
+                    <div class="field"><label for="toStreet">Street *</label><input id="toStreet" required value="Broadway 1"></div>
+                    <div class="field"><label for="toCity">City *</label><input id="toCity" required value="New York"></div>
+                    <div class="field"><label for="toState">State *</label><input id="toState" required value="NY"></div>
+                </div>
+                <div>
+                    <div class="field"><label for="toZip">ZIP *</label><input id="toZip" required value="10007"></div>
+                    <div class="field"><label for="toCountry">Country *</label><input id="toCountry" required maxlength="2" value="US"></div>
+                    <div class="field"><label for="toPhone">Phone</label><input id="toPhone"></div>
+                    <div class="field"><label for="toEmail">Email</label><input id="toEmail" type="email" value="customer@example.com"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">PARCEL</h2>
+            <div class="parcel-grid">
+                <div class="field"><label for="length">Length (in) *</label><input id="length" type="number" min="0.01" step="0.01" required value="5"></div>
+                <div class="field"><label for="width">Width (in) *</label><input id="width" type="number" min="0.01" step="0.01" required value="5"></div>
+                <div class="field"><label for="height">Height (in) *</label><input id="height" type="number" min="0.01" step="0.01" required value="5"></div>
+                <div class="field"><label for="weight">Weight (lb) *</label><input id="weight" type="number" min="0.01" step="0.01" required value="2"></div>
+            </div>
+            <div class="actions">
+                <button class="primary" id="getRatesBtn" type="submit">🔎 Get Shipping Rates</button>
+                <span id="loadingText" class="hidden">Loading Shippo rates...</span>
+            </div>
+            <div id="message" class="status"></div>
+        </div>
+    </form>
+
+    <div class="card" id="ratesCard" hidden>
+        <h2 class="section-title">Available Rates</h2>
+        <p>Select one rate. The application does not assume the first rate is cheapest.</p>
+        <table>
+            <thead><tr><th>Select</th><th>Carrier</th><th>Service</th><th>Price</th><th>Currency</th><th>Estimated Days</th></tr></thead>
+            <tbody id="ratesBody"></tbody>
+        </table>
+        <div class="actions" style="margin-top:16px;">
+            <button class="primary" id="createLabelBtn" disabled>🏷️ Create Shipping Label</button>
+            <span id="labelLoading" class="hidden">Creating label...</span>
+        </div>
+    </div>
+
+    <div class="card" id="resultCard" hidden>
+        <h2 class="section-title">Shipping Label Result</h2>
+        <div id="result" class="result"></div>
+        <p style="margin-top:18px;"><a id="labelLink" target="_blank" rel="noopener">📄 Open Shipping Label PDF</a></p>
+    </div>
+</main>
+
+<script>
+    let currentShipmentId = null;
+    let selectedRate = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function value(id) {
+        return $(id).value.trim();
+    }
+
+    function collectShipment() {
+        return {
+            fromName: value('fromName'), fromCompany: value('fromCompany'), fromStreet: value('fromStreet'),
+            fromCity: value('fromCity'), fromState: value('fromState'), fromZip: value('fromZip'),
+            fromCountry: value('fromCountry').toUpperCase(), fromPhone: value('fromPhone'), fromEmail: value('fromEmail'),
+            toName: value('toName'), toCompany: value('toCompany'), toStreet: value('toStreet'),
+            toCity: value('toCity'), toState: value('toState'), toZip: value('toZip'),
+            toCountry: value('toCountry').toUpperCase(), toPhone: value('toPhone'), toEmail: value('toEmail'),
+            length: Number(value('length')), width: Number(value('width')), height: Number(value('height')), weight: Number(value('weight'))
+        };
+    }
+
+    function showMessage(text, type) {
+        $('message').textContent = text;
+        $('message').className = 'status ' + type;
+    }
+
+    async function readError(response) {
+        try {
+            const data = await response.json();
+            return data.message || 'The request failed.';
+        } catch (_) {
+            return 'The request failed with HTTP ' + response.status + '.';
+        }
+    }
+
+    $('shipmentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        $('getRatesBtn').disabled = true;
+        $('loadingText').classList.remove('hidden');
+        showMessage('', 'info');
+        $('ratesCard').hidden = true;
+        $('resultCard').hidden = true;
+        selectedRate = null;
+        currentShipmentId = null;
+
+        try {
+            const response = await fetch('/api/shipments/rates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(collectShipment())
+            });
+            if (!response.ok) throw new Error(await readError(response));
+
+            const rates = await response.json();
+            if (!rates.length) throw new Error('No rates were returned.');
+            currentShipmentId = rates[0].shippoShipmentId;
+            renderRates(rates);
+            $('ratesCard').hidden = false;
+            showMessage('Rates loaded. Select the service you want to purchase.', 'success');
+        } catch (error) {
+            showMessage(error.message, 'error');
+        } finally {
+            $('getRatesBtn').disabled = false;
+            $('loadingText').classList.add('hidden');
+        }
+    });
+
+    function renderRates(rates) {
+        const body = $('ratesBody');
+        body.innerHTML = '';
+        rates.forEach((rate, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="radio" name="rate" value="${escapeHtml(rate.rateId)}" data-index="${index}"></td>
+                <td>${escapeHtml(rate.carrier || '')}</td>
+                <td>${escapeHtml(rate.service || '')}</td>
+                <td>${escapeHtml(rate.amount || '')}</td>
+                <td>${escapeHtml(rate.currency || '')}</td>
+                <td>${escapeHtml(rate.estimatedDays || 'N/A')}</td>`;
+            const radio = row.querySelector('input');
+            radio.addEventListener('change', () => {
+                document.querySelectorAll('#ratesBody tr').forEach(r => r.classList.remove('selected'));
+                row.classList.add('selected');
+                selectedRate = rates[index];
+                $('createLabelBtn').disabled = false;
+            });
+            body.appendChild(row);
+        });
+    }
+
+    $('createLabelBtn').addEventListener('click', async () => {
+        if (!selectedRate || !currentShipmentId) {
+            showMessage('Select a rate first.', 'error');
+            return;
+        }
+
+        $('createLabelBtn').disabled = true;
+        $('labelLoading').classList.remove('hidden');
+
+        try {
+            const payload = {
+                ...collectShipment(),
+                shippoShipmentId: currentShipmentId,
+                rateId: selectedRate.rateId
+            };
+            const response = await fetch('/api/shipments/label', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(await readError(response));
+
+            const result = await response.json();
+            $('resultCard').hidden = false;
+            $('result').innerHTML = `
+                <p><strong>Status:</strong> ${escapeHtml(result.status)}</p>
+                <p><strong>Carrier:</strong> ${escapeHtml(result.carrier || '')}</p>
+                <p><strong>Service:</strong> ${escapeHtml(result.service || '')}</p>
+                <p><strong>Price:</strong> ${escapeHtml(result.amount || '')} ${escapeHtml(result.currency || '')}</p>
+                <p><strong>Tracking:</strong> ${escapeHtml(result.trackingNumber || '')}</p>
+                <p><strong>Database ID:</strong> ${escapeHtml(String(result.shipmentId || ''))}</p>`;
+            $('labelLink').href = result.labelUrl;
+            showMessage('Shipping label created and saved to MySQL.', 'success');
+            $('resultCard').scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            showMessage(error.message, 'error');
+        } finally {
+            $('createLabelBtn').disabled = false;
+            $('labelLoading').classList.add('hidden');
+        }
+    });
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+</script>
+</body>
+</html>
